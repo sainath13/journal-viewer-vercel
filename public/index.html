@@ -143,18 +143,37 @@
             // Sort dates in ascending order
             polarityData.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-            // Prepare chart data
+            // Define colors for mood categories
+            const moodColors = {
+                'very_good': 'rgba(0, 255, 0, 0.5)', // Green
+                'good': 'rgba(0, 255, 255, 0.5)',    // Cyan
+                'bad': 'rgba(255, 255, 0, 0.5)',     // Yellow
+                'very_bad': 'rgba(255, 0, 0, 0.5)'   // Red
+            };
+
+            // Prepare chart data with mood categories and colors
             const ctx = document.getElementById('polarityChart').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: polarityData.map(data => new Date(data.date).toLocaleString('en-US', { month: '2-digit', day: '2-digit' })),
                     datasets: [{
-                        label: 'Average Mood Rating',
+                        label: 'Mood Rating',
                         data: polarityData.map(data => data.mood_rating),
-                        borderColor: 'rgba(75, 192, 192, 1)',
+                        // borderColor: 'rgba(0, 192, 192, 1)',
+                        backgroundColor: polarityData.map(data => {
+                            if (data.mood_rating > 0.5) {
+                                return moodColors['very_good'];
+                            } else if (data.mood_rating > 0) {
+                                return moodColors['good'];
+                            } else if (data.mood_rating >= -0.5) {
+                                return moodColors['bad'];
+                            } else {
+                                return moodColors['very_bad'];
+                            }
+                        }),
                         borderWidth: 5,
-                        fill: false,
+                        fill: true,
                         tension: 0.1
                     }]
                 },
@@ -170,13 +189,15 @@
                         y: {
                             title: {
                                 display: true,
-                                text: 'Average Mood Rating'
+                                text: 'Mood'
                             }
                         }
                     }
                 }
             });
         }
+
+
 
 
 
