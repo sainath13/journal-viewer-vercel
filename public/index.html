@@ -154,13 +154,12 @@
             // Prepare chart data with mood categories and colors
             const ctx = document.getElementById('polarityChart').getContext('2d');
             new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: polarityData.map(data => new Date(data.date).toLocaleString('en-US', { month: '2-digit', day: '2-digit' })),
                     datasets: [{
-                        label: 'Mood Rating',
+                        label: 'Mood rating',
                         data: polarityData.map(data => data.mood_rating),
-                        // borderColor: 'rgba(0, 192, 192, 1)',
                         backgroundColor: polarityData.map(data => {
                             if (data.mood_rating > 0.5) {
                                 return moodColors['very_good'];
@@ -172,9 +171,7 @@
                                 return moodColors['very_bad'];
                             }
                         }),
-                        borderWidth: 5,
-                        fill: true,
-                        tension: 0.1
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -189,13 +186,23 @@
                         y: {
                             title: {
                                 display: true,
-                                text: 'Mood'
+                                text: 'Mood Rating'
+                            },
+                            ticks: {
+                                beginAtZero: true
                             }
                         }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // Remove legend
+                        }
                     }
+
                 }
             });
         }
+
 
 
 
