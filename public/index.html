@@ -60,15 +60,15 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch('/api/getJournalEntries');
             const journalData = await response.json();
-
+            // console.log("got this data from backend", journalData);
             if (!journalData) {
                 console.error('Failed to fetch journal data.');
                 return;
             }
 
             // Get unique days
-            const days = [...new Set(journalData.map(entry => entry.date))];
-
+            const days = [...new Set(journalData.map(entry => entry.created_at.split('T')[0]))];
+            // console.log("days are these ", days)
             // Create day navigation
             const dayNav = document.getElementById('dayNav');
             days.forEach(day => {
@@ -78,44 +78,50 @@
                 dayNav.appendChild(button);
             });
 
+            // Load polarity chart
+            console.log("loading polarity chart");
+            loadPolarityChart(journalData);
             // Load entries for the first day by default
             if (days.length > 0) {
                 loadEntries(days[0], journalData);
             }
 
-            // Load polarity chart
-            loadPolarityChart(journalData);
+
         });
 
         function loadEntries(day, journalData) {
             const entriesDiv = document.getElementById('journalEntries');
             entriesDiv.innerHTML = '';
 
-            const entries = journalData.filter(entry => entry.date === day);
+            const entries = journalData.filter(entry => entry.created_at.split('T')[0] === day);
+            // console.log("Got the entries as ", entries)
             entries.forEach(entry => {
                 const entryDiv = document.createElement('div');
                 entryDiv.className = 'entry';
-                entryDiv.innerHTML = `<h3>${entry.date}</h3><p>${entry.entry}</p><p>Mood: ${entry.mood}</p>`;
+                entryDiv.innerHTML = `<h3>${new Date(entry.created_at).toLocaleString('en-US', {
+                    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'
+                })}</h3><p>${entry.journal_text}</p><p>Mood: ${entry.mood}</p>`;
                 entriesDiv.appendChild(entryDiv);
             });
         }
-
+        //                    labels: polarityData.map(data => new Date(data.date).toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })),
         function loadPolarityChart(journalData) {
+            // console.log("Data for polarity is", journalData);
             const polarityData = journalData.map(entry => ({
-                date: entry.date,
-                polarity: entry.polarity
+                date: entry.created_at,
+                mood_rating: entry.mood_rating
             }));
-
+            console.log("Data after population for polarity is", polarityData);
             const ctx = document.getElementById('polarityChart').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: polarityData.map(data => data.date),
+                    labels: polarityData.map(data => new Date(data.date).toLocaleString('en-US', { month: '2-digit', day: '2-digit' })),
                     datasets: [{
-                        label: 'Polarity',
-                        data: polarityData.map(data => data.polarity),
+                        label: 'mood_rating',
+                        data: polarityData.map(data => data.mood_rating),
                         borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1,
+                        borderWidth: 5,
                         fill: false,
                         tension: 0.1
                     }]
@@ -132,7 +138,7 @@
                         y: {
                             title: {
                                 display: true,
-                                text: 'Polarity'
+                                text: 'mood_rating'
                             }
                         }
                     }

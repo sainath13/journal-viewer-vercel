@@ -5,10 +5,13 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 module.exports = async (req, res) => {
+    // console.log("fetching data for you from supabase");
     const { data, error } = await supabase.from('JournalEntries').select('*');
     if (error) {
+        // console.log("error occured", error.message);
         return res.status(500).json({ error: error.message });
     }
+    // console.log("returning data", data);
     res.status(200).json(data);
 };
 
