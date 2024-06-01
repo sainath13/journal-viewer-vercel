@@ -111,16 +111,17 @@
             entries.forEach(entry => {
                 const entryDiv = document.createElement('div');
                 entryDiv.className = 'entry';
-                entryDiv.innerHTML = `<h3><i class="bi bi-calendar-event"></i>
-                    <div class="alert alert-light" role="alert">
-                    ${new Date(entry.created_at).toLocaleString('en-US', {
-                    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'
+                entryDiv.innerHTML = `<h3>
+            <div class="alert alert-light" role="alert">Time :
+            ${new Date(entry.created_at).toLocaleString('en-US', {
+                    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
                 })}</div></h3><p>${entry.journal_text}</p>
-                <div class="card"><div class="card-body">
-                <p>Mood: <span class="badge ${getMoodBadgeClass(entry.mood_rating)}">${entry.mood}</span></p></div></div>`;
+        <div class="card"><div class="card-body text-center">
+        <p>Mood: <span class="btn ${getMoodBadgeClass(entry.mood_rating)}">${entry.mood}</span></p></div></div>`;
                 entriesDiv.appendChild(entryDiv);
             });
         }
+
 
         function getMoodBadgeClass(mood_rating) {
             if (mood_rating > 0.5)
