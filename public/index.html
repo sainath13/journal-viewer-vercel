@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Journal Entries</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Journal Amigo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,39 +15,40 @@
         }
 
         .container {
-            padding-top: 20px;
-        }
-
-        .journal-section {
             padding: 20px;
         }
 
+        .journal-section,
         .polarity-section {
-            border-left: 1px solid #ccc;
             padding: 20px;
-            height: calc(100vh - 40px);
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            margin-bottom: 20px;
         }
 
         .day-nav {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
+            height: 60px;
+            overflow-x: auto;
+            white-space: nowrap;
+            margin-bottom: 10px;
+        }
+
+        .day-nav button {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .journal-entries {
+            overflow-y: auto;
+            max-height: 60vh;
         }
 
         .entry {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
-
-<!-- <body>
-    <div class="journal-section">
-        <div class="day-nav" id="dayNav"></div>
-        <div class="journal-entries" id="journalEntries"></div>
-    </div>
-    <div class="polarity-section">
-        <canvas id="polarityChart"></canvas>
-    </div> -->
 
 <body>
     <div class="container">
@@ -62,12 +63,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -89,6 +84,7 @@
             const dayNav = document.getElementById('dayNav');
             days.forEach(day => {
                 const button = document.createElement('button');
+                button.className = 'btn btn-secondary';
                 button.textContent = day;
                 button.onclick = () => loadEntries(day, journalData);
                 dayNav.appendChild(button);
@@ -116,13 +112,26 @@
             entries.forEach(entry => {
                 const entryDiv = document.createElement('div');
                 entryDiv.className = 'entry';
-                entryDiv.innerHTML = `<h3>${new Date(entry.created_at).toLocaleString('en-US', {
+                entryDiv.innerHTML = `<h3><i class="bi bi-calendar-event"></i> ${new Date(entry.created_at).toLocaleString('en-US', {
                     year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'
-                })}</h3><p>${entry.journal_text}</p><p>Mood: ${entry.mood}</p>`;
+                })}</h3><p>${entry.journal_text}</p><p>Mood: <span class="badge ${getMoodBadgeClass(entry.mood_rating)}">${entry.mood}</span></p>`;
                 entriesDiv.appendChild(entryDiv);
             });
         }
-        //                    labels: polarityData.map(data => new Date(data.date).toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })),
+
+        function getMoodBadgeClass(mood_rating) {
+            if (mood_rating > 0.5)
+                return 'bg-success';
+            if (mood_rating > 0 && mood_rating < 0.5)
+                return 'bg-info';
+            if (mood_rating > -0.5 && mood_rating < 0)
+                return 'bg-warning';
+            if (mood_rating < 0.5)
+                return 'bg-danger';
+            return 'bg-secondary';
+
+        }
+
         function loadPolarityChart(journalData) {
             // Extract dates and mood ratings
             const groupedData = journalData.reduce((accumulator, currentValue) => {
@@ -148,7 +157,7 @@
             const moodColors = {
                 'very_good': 'rgba(0, 255, 0, 0.5)', // Green
                 'good': 'rgba(0, 255, 255, 0.5)',    // Cyan
-                'bad': 'rgba(255, 255, 0, 0.5)',     // Yellow
+                'bad': 'rgba(255, 165, 0, 0.5)',     // orange
                 'very_bad': 'rgba(255, 0, 0, 0.5)'   // Red
             };
 
@@ -203,13 +212,8 @@
                 }
             });
         }
-
-
-
-
-
-
     </script>
+
 </body>
 
 </html>
