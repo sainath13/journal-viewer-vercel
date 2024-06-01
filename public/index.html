@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal Entries</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+        }
+        .journal-section {
+            width: 70%;
+            padding: 20px;
+        }
+        .polarity-section {
+            width: 30%;
+            padding: 20px;
+            border-left: 1px solid #ccc;
+        }
+        .day-nav {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .day-nav button {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .journal-entries {
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+        .entry {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="journal-section">
+        <div class="day-nav" id="dayNav"></div>
+        <div class="journal-entries" id="journalEntries"></div>
+    </div>
+    <div class="polarity-section">
+        <canvas id="polarityChart"></canvas>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/journal.js"></script>
+</body>
+</html>
+
