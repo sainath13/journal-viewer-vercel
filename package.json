@@ -1,0 +1,14 @@
+{
+  "name": "my-journal-app",
+  "version": "1.0.0",
+  "description": "A journal app with Vercel serverless functions and Supabase",
+  "main": "index.js",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0"
+  },
+  "devDependencies": {}
+}
+
