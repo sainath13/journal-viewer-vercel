@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Get unique days
     const days = [...new Set(journalData.map(entry => entry.date))];
-    
+
     // Create day navigation
     const dayNav = document.getElementById('dayNav');
     days.forEach(day => {
