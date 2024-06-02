@@ -171,7 +171,7 @@
     Time: ${new Date(entry.created_at).toLocaleTimeString('en-US', {
                     hour: '2-digit', minute: '2-digit'
                 })}
-</div></h5><p>${entry.journal_text}</p>
+</div></h5><p>${entry.journal_text.replace(/[^\x00-\x7F]/g, "'")}</p>
     
             <div class="callout-info text-center">
                 <p class="text-primary font-monospace fs-5">Mood: <span class="btn ${getMoodBadgeClass(entry.mood_rating)}">${entry.mood.toUpperCase()}</span></p>
