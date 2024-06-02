@@ -89,8 +89,14 @@
                 <div class="journal-entries" id="journalEntries"></div>
             </div>
             <div class="col-md-4 polarity-section">
+                <p>Mood graph</p>
                 <canvas id="polarityChart"></canvas>
-                <div id="expenseTableContainer" class="mt-4"></div> <!-- Added container for expense table -->
+                <p>Expense graph</p>
+                <div style="margin: 70px; align-items: center;">
+                    <div id="expenseTableContainer" class="mt-4">
+                        <canvas id="expenseChart"></canvas>
+                    </div> <!-- Added container for expense table -->
+                </div>
             </div>
         </div>
     </div>
@@ -260,6 +266,7 @@
         function displayBudgetEntries(day, budgetData) {
             const expenseTableContainer = document.getElementById('expenseTableContainer');
             expenseTableContainer.innerHTML = '';
+
             if (!budgetData || budgetData.length === 0) {
                 expenseTableContainer.innerHTML = '<p>No budget entries available.</p>';
                 return;
@@ -269,28 +276,83 @@
                 .filter(entry => entry.created_at.split('T')[0] === day)
                 .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
-            const table = document.createElement('table');
-            table.className = 'table table-bordered';
-            table.innerHTML = `
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Item</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${entries.map(entry => `
-                        <tr>
-                            <td>${entry.category || 'N/A'}</td>
-                            <td>${entry.item || 'N/A'}</td>
-                            <td>${entry.amount ? `$${entry.amount.toFixed(2)}` : 'N/A'}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            `;
-            expenseTableContainer.appendChild(table);
+            if (entries.length === 0) {
+                expenseTableContainer.innerHTML = '<p>No budget entries available for this day.</p>';
+                return;
+            }
+
+            // Gather data by category
+            const categoryData = entries.reduce((acc, entry) => {
+                const category = entry.category || 'N/A';
+                acc[category] = (acc[category] || 0) + (entry.amount || 0);
+                return acc;
+            }, {});
+
+            const categories = Object.keys(categoryData);
+            const amounts = Object.values(categoryData);
+
+            // Create and append the canvas element
+            const expenseChart = document.createElement('canvas');
+            expenseChart.id = 'expenseChart';
+            expenseChart.height = 1;
+            expenseChart.width = 1;
+            // expenseChart.style.height = '50%';
+            expenseTableContainer.appendChild(expenseChart);
+
+            // Create the chart
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        data: amounts,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)',
+                            'rgba(255, 159, 64, 0.8)',
+                            'rgba(255, 124, 64, 0.8)',
+                            'rgba(255, 159, 124, 0.8)',
+                            'rgba(129, 159, 64, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(255, 124, 64, 1)',
+                            'rgba(255, 159, 124, 1)',
+                            'rgba(129, 159, 64, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (tooltipItem) {
+                                    return `$${amounts[tooltipItem.dataIndex].toFixed(2)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
+
+
+
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.js"></script>
 </body>
