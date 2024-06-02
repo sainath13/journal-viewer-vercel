@@ -64,7 +64,7 @@
     <df-messenger oauth-client-id="740071116147-23u8uc0os7fgajfgq98ca1lnk7nbnh6i.apps.googleusercontent.com"
         location="us-central1" project-id="devposthackathon" agent-id="00604234-7b3e-4916-ba76-cfc4671471e5"
         language-code="en" max-query-length="-1">
-        <df-messenger-chat-bubble chat-title="LifeTracker">
+        <df-messenger-chat-bubble chat-title="Journal Amigo">
         </df-messenger-chat-bubble>
     </df-messenger>
     <style>
@@ -73,6 +73,10 @@
             position: fixed;
             bottom: 16px;
             right: 16px;
+            box-shadow: 0 0 10px 3px rgba(0, 123, 255, 0.7);
+            /* Glowing highlight */
+            border-radius: 8px;
+            /* Optional: rounded corners for a smoother look */
         }
     </style>
     <div class="container">
@@ -115,14 +119,24 @@
                 button.onclick = () => loadEntries(day, journalData);
                 dayNav.appendChild(button);
             });
+            const today = new Date().toISOString().split('T')[0];
+            console.log("Hello today is ", today);
+            // Check if today's date is in the list of days
+            if (days.includes(today)) {
+                console.log("Today is in journal ", today);
+                loadEntries(today, journalData);
+            } else if (days.length > 0) {
+                console.log("Today is not in journal ", today);
+                loadEntries(days[days.length - 1], journalData);
+            }
 
             // Load polarity chart
-            console.log("loading polarity chart");
+            // console.log("loading polarity chart");
             loadPolarityChart(journalData);
             // Load entries for the first day by default
-            if (days.length > 0) {
-                loadEntries(days[0], journalData);
-            }
+            // if (days.length > 0) {
+            //     loadEntries(days[0], journalData);
+            // }
         });
 
         function loadEntries(day, journalData) {
@@ -150,7 +164,7 @@
 </div></h5><p>${entry.journal_text}</p>
     
             <div class="callout-info text-center">
-                <p class="text-primary font-monospace fs-5">Mood: <span class="btn ${getMoodBadgeClass(entry.mood_rating)}">${getMoodSmiley(entry.mood_rating)} ${entry.mood}</span></p>
+                <p class="text-primary font-monospace fs-5">Mood: <span class="btn ${getMoodBadgeClass(entry.mood_rating)}">${entry.mood.toUpperCase()}</span></p>
             
         </div><svg height="5" width="100%">
     <line x1="0" y1="0" x2="100%" y2="0" style="stroke:#007bff;stroke-width:5" />
