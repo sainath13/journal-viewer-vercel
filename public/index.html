@@ -58,6 +58,23 @@
 </head>
 
 <body>
+    <link rel="stylesheet"
+        href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+    <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+    <df-messenger oauth-client-id="740071116147-23u8uc0os7fgajfgq98ca1lnk7nbnh6i.apps.googleusercontent.com"
+        location="us-central1" project-id="devposthackathon" agent-id="00604234-7b3e-4916-ba76-cfc4671471e5"
+        language-code="en" max-query-length="-1">
+        <df-messenger-chat-bubble chat-title="LifeTracker">
+        </df-messenger-chat-bubble>
+    </df-messenger>
+    <style>
+        df-messenger {
+            z-index: 999;
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+        }
+    </style>
     <div class="container">
         <h1 class="text-center mb-4 text-primary fw-bold text-shadow bordered-text"><i class="fa-solid fa-book"></i>
             Journal Amigo </h1>
