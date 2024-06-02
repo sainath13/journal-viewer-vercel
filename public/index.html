@@ -90,6 +90,7 @@
             </div>
             <div class="col-md-4 polarity-section">
                 <canvas id="polarityChart"></canvas>
+                <div id="expenseTableContainer" class="mt-4"></div> <!-- Added container for expense table -->
             </div>
         </div>
     </div>
@@ -97,9 +98,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            const response = await fetch('/api/getJournalEntries');
-            const journalData = await response.json();
-            // console.log("got this data from backend", journalData);
+            const journalResponse = await fetch('/api/getJournalEntries');
+            const journalData = await journalResponse.json();
+
             if (!journalData) {
                 console.error('Failed to fetch journal data.');
                 return;
@@ -109,45 +110,48 @@
             const days = [...new Set(journalData.map(entry => entry.created_at.split('T')[0]))].sort((a, b) => {
                 return new Date(a) - new Date(b);
             });
-            // console.log("days are these ", days)
+
+            // Fetch and display budget entries
+            const budgetResponse = await fetch('/api/getBudgetEntries');
+            const budgetData = await budgetResponse.json();
             // Create day navigation
             const dayNav = document.getElementById('dayNav');
             days.forEach(day => {
                 const button = document.createElement('button');
                 button.className = 'btn btn-outline-primary';
                 button.textContent = day;
-                button.onclick = () => loadEntries(day, journalData);
+                button.onclick = () => {
+                    loadEntries(day, journalData);
+                    displayBudgetEntries(day, budgetData);
+                };
                 dayNav.appendChild(button);
             });
+
             const today = new Date().toISOString().split('T')[0];
-            console.log("Hello today is ", today);
+
             // Check if today's date is in the list of days
             if (days.includes(today)) {
-                console.log("Today is in journal ", today);
                 loadEntries(today, journalData);
+                displayBudgetEntries(today, budgetData);
             } else if (days.length > 0) {
-                console.log("Today is not in journal ", today);
                 loadEntries(days[days.length - 1], journalData);
+                displayBudgetEntries(days[days.length - 1], budgetData);
             }
 
             // Load polarity chart
-            // console.log("loading polarity chart");
             loadPolarityChart(journalData);
-            // Load entries for the first day by default
-            // if (days.length > 0) {
-            //     loadEntries(days[0], journalData);
-            // }
+
         });
 
         function loadEntries(day, journalData) {
             const entriesDiv = document.getElementById('journalEntries');
             entriesDiv.innerHTML = '';
-            entriesDiv.style.overflowY = 'auto'; // Ensure scrolling remains enabled
+            entriesDiv.style.overflowY = 'auto';
 
             const entries = journalData
                 .filter(entry => entry.created_at.split('T')[0] === day)
                 .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-            // console.log("Got the entries as ", entries)
+
             entries.forEach(entry => {
                 const entryDiv = document.createElement('div');
                 entryDiv.className = 'entry';
@@ -173,43 +177,11 @@
             });
         }
 
-
-
         function getMoodBadgeClass(mood_rating) {
-            if (mood_rating > 0.5)
-                return 'bg-light';
-            if (mood_rating > 0 && mood_rating < 0.5)
-                return 'bg-light';
-            if (mood_rating > -0.5 && mood_rating < 0)
-                return 'bg-light';
-            if (mood_rating < 0.5)
-                return 'bg-light';
             return 'bg-light';
-
-        }
-        function getMoodSmiley(mood_rating) {
-            mood = "unknown";
-            if (mood_rating > 0.5)
-                mood = 'very_good';
-            if (mood_rating > 0 && mood_rating < 0.5)
-                mood = 'good';
-            if (mood_rating > -0.5 && mood_rating < 0)
-                mood = 'bad';
-            if (mood_rating < 0.5)
-                mood = 'very_bad';
-            const moodSmilies = {
-                'very_good': '😄',
-                'good': '🙂',
-                'bad': '😞',
-                'very_bad': '😢'
-            };
-
-
-            return moodSmilies[mood] || '';
         }
 
         function loadPolarityChart(journalData) {
-            // Extract dates and mood ratings
             const groupedData = journalData.reduce((accumulator, currentValue) => {
                 const date = currentValue.created_at.split('T')[0];
                 if (!accumulator[date]) {
@@ -220,25 +192,20 @@
                 return accumulator;
             }, {});
 
-            // Calculate average mood rating for each date
             const polarityData = Object.entries(groupedData).map(([date, data]) => ({
                 date,
                 mood_rating: data.mood_sum / data.count
             }));
 
-            // Sort dates in ascending order
             polarityData.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-            // Define colors for mood categories
             const moodColors = {
-                'very_good': 'rgba(0, 255, 0, 0.5)', // Green
-                'good': 'rgba(0, 255, 255, 0.5)',    // Cyan
-                'bad': 'rgba(255, 165, 0, 0.5)',     // orange
-                'very_bad': 'rgba(255, 0, 0, 0.5)'   // Red
+                'very_good': 'rgba(0, 255, 0, 0.5)',
+                'good': 'rgba(0, 255, 255, 0.5)',
+                'bad': 'rgba(255, 165, 0, 0.5)',
+                'very_bad': 'rgba(255, 0, 0, 0.5)'
             };
 
-
-            // Prepare chart data with mood categories and colors
             const ctx = document.getElementById('polarityChart').getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
@@ -282,12 +249,47 @@
                     },
                     plugins: {
                         legend: {
-                            display: false // Remove legend
+                            display: false
                         }
                     }
 
                 }
             });
+        }
+
+        function displayBudgetEntries(day, budgetData) {
+            const expenseTableContainer = document.getElementById('expenseTableContainer');
+            expenseTableContainer.innerHTML = '';
+            if (!budgetData || budgetData.length === 0) {
+                expenseTableContainer.innerHTML = '<p>No budget entries available.</p>';
+                return;
+            }
+
+            const entries = budgetData
+                .filter(entry => entry.created_at.split('T')[0] === day)
+                .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+            const table = document.createElement('table');
+            table.className = 'table table-bordered';
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Item</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${entries.map(entry => `
+                        <tr>
+                            <td>${entry.category || 'N/A'}</td>
+                            <td>${entry.item || 'N/A'}</td>
+                            <td>${entry.amount ? `$${entry.amount.toFixed(2)}` : 'N/A'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            expenseTableContainer.appendChild(table);
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.js"></script>

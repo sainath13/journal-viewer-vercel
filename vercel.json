@@ -8,12 +8,20 @@
     {
       "src": "api/getJournalEntries.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "/api/getBudgetEntries.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
+      "src": "/api/getJournalEntries",
       "dest": "/api/getJournalEntries.js"
+    },
+    {
+      "src": "/api/getBudgetEntries",
+      "dest": "/api/getBudgetEntries.js"
     },
     {
       "src": "/(.*)",
